@@ -2,7 +2,7 @@
 
 ## POWERSHELL O365 COMMANDS
 
-## ------------------------------------------------------------------MAILBOXES-----------------------------------------------------------------------------------
+## ---------------------------------------------------------MAILBOXES----------------------------------------------------------
 
 
 ## Disable Clutter for an individual Mailbox 
@@ -17,122 +17,121 @@
 ## Remove SMTP Forwarding Address in bulk 
     Import-Csv "C:\o365\removeforwarding.csv" |foreach {Set-Mailbox $_.upn -ForwardingSmtpAddress $null -DeliverToMailboxAndForward $False}
 
-##Email Individual Mailbox Archive 
+## Email Individual Mailbox Archive 
     Enable-Mailbox -Identity UPN –archive
 
-##Set Individual Mailbox Retention Policy 
+## Set Individual Mailbox Retention Policy 
     Set-Mailbox EMAILADDRESS -retentionpolicy "NAME OF POLICY"
   
-##Exporting Distribution Group Member List to CSV file (Can be run in Cogmotive as well) 
+## Exporting Distribution Group Member List to CSV file (Can be run in Cogmotive as well) 
     Get-DistributionGroupMember {Name of Group} | Sort -Property DisplayName | Select DisplayName, Alias, Department | Export-CSV C:DGmemberlist.csv
     Get-DistributionGroupMember NAME | Sort -Property DisplayName | Select emailaddresses >C:\Users\mburke\Desktop\Temp\DistNames.txt
     Get-DistributionGroupMember -identity <LISTNAME> c:\temp\<LISTNAME>.txt
 
-##Add SMB Full Access with Automapping Disabled 
+## Add SMB Full Access with Automapping Disabled 
     Add-MailboxPermission SMBEMAILADDRESS -user UPN -AccessRights FullAccess -Automapping $False
 
-##Add Send As permissions to a Mailbox 
+## Add Send As permissions to a Mailbox 
     Add-RecipientPermission SMBEMAILADDRESS -trustee UPN -accessrights SendAs
 
-##Get Distribution Group Information 
+## Get Distribution Group Information 
     Get-DistributionGroup EMAILADDRESS | fl 
 
-##Add Mailbox Size (Bulk)
+## Add Mailbox Size (Bulk)
     Get-Content "C:\o365\MailboxSize.csv" | Set-Mailbox -ProhibitSendReceiveQuota 107374184400 -ProhibitSendQuota 106300440576 -IssueWarningQuota 105226698752 
 
-##Confirm Mailbox Size (Bulk)
+## Confirm Mailbox Size (Bulk)
     Get-Content "C:\o365\MailboxSize.csv" | Get-Mailbox | Select ProhibitSendReceiveQuota,ProhibitSendQuota,IssueWarningQuota | Export-Csv C:\o365\MailboxSizeResults.csv 
 
-##Getting all users from a domain
+## Getting all users from a domain
     Get-Mailbox -ResultSize unlimited | where {$_.primarysmtpaddress -like "*@smpi74.fr"} | select name, primarysmtpaddress
 
-##Checking PrimarySMTP for multiple users
+## Checking PrimarySMTP for multiple users
     Get-Content "C:\o365\PrimarySMTP.csv" | Get-Mailbox | Select PrimarySmtpAddress  
 
-##Mass Adding External Contacts
+## Mass Adding External Contacts
     PS C:\Windows\system32> Import-Csv "C:\o365\contactstest.csv" | ForEach{New-MailContact -DisplayName $_.DisplayName -FirstName $_.FirstName -LastName $_.LastName -ExternalEmailAddress $_.EmailAddress -Alias $_.Alias -Name $_.Name 
 
-##Message Trace Location
+## Message Trace Location
     Search-Mailbox EMAILADDRESS -SearchDumpster -SearchQuery 'subject:"website*"' -TargetMailbox Jacob.thoreson-cloud@itwo365.com -targetfolder inbox
 
-##Purge Mailbox Data
+## Purge Mailbox Data
     Search-Mailbox -Identity "<MailboxOrMailUserIdParameter>" -DeleteContent -force
 
-##Set OOO
+## Set OutOfOffice
     Set-MailboxAutoReplyConfiguration pschmitt@youremail.com –AutoReplyState Enabled –ExternalMessage “” –InternalMessage “”
     ##Scheduled –StartTime “1/8/2013” –EndTime “1/15/2013” for scheduling the OOO
-##Turn OFF OOO
+## Turn OFF OOO
     Set-MailboxAutoReplyConfiguration username –AutoReplyState Disabled –ExternalMessage $null –InternalMessage $null
-##Check Inbox Rules for mailbox
+## Check Inbox Rules for mailbox
     Get-InboxRule -Mailbox Joe@Contoso.com | fl
  
-##Adding Delegate to managers calendar
+## Adding Delegate to managers calendar
     Add-MailboxFolderPermission -Identity ayla@contoso.com:\Calendar -User laura@contoso.com -AccessRights Editor -SharingPermissionFlags Delegate,CanViewPrivateItems
 
-##Bulk Alias Add to DG
+## Bulk Alias Add to DG
     Import-Csv C:\o365\Book1.csv | foreach {Set-DistributionGroup cylance@itw.com -EmailAddress @{add=$_.alias}}  
 
-##---------------------------------------------------------SPAM/EOP----------------------------------------------------------------------
+## ---------------------------------------------------------SPAM/EOP--------------------------------------------------------------------
 
 
-
-##Get Junk Email Configuration 
+## Get Junk Email Configuration 
     Get-MailboxJunkEmailConfiguration EMAILADDRESS
-##Check the blocked senders and safe senders at the client level, use the following commands 
+## Check the blocked senders and safe senders at the client level, use the following commands 
     (Get-MailboxJunkEmailConfiguration EMAIL ADDRESS).blockedsendersanddomains
     (Get-MailboxJunkEmailConfiguration EMAIL ADDRESS).trustedsendersanddomains
  
-##Add Address or Domain to Mailbox Blocked Senders/Domain list 
+## Add Address or Domain to Mailbox Blocked Senders/Domain list 
     Set-MailboxJunkEmailConfiguration EMAILADDRESS -TrustedSendersAndDomains @{Add=""}
     Set-MailboxJunkEmailConfiguration EMAILADDRESS -BlockedSendersAndDomains @{Add=""}
-##Remove address or domain from Blocked (or trusted) list 
+## Remove address or domain from Blocked (or trusted) list 
     Set-MailboxJunkEmailConfiguration EMAILADDRESS -TrustedSendersAndDomains @{remove=""}
     Set-MailboxJunkEmailConfiguration EMAILADDRESS -BlockedSendersAndDomains @{remove=""} 
 
-##Perimeter Message Trace (Does not show up in Message Trace, sender will receive NDR)
+## Perimeter Message Trace (Does not show up in Message Trace, sender will receive NDR)
     Get-PerimeterMessageTrace -Recipient EMAILADDRESS
 
-#EXPORT MESSAGE TRACE TO CSV
+# EXPORT MESSAGE TRACE TO CSV
     Get-MessageTrace -SenderAddress “Email Address” -StartDate 2/20/2018 -EndDate 2/22/2018 | Export-Csv C:\Users\jthoreson\Documents\klopezMT.csv 
 
 
-#Content Search
+# Content Search
     New-ComplianceSearchAction -SearchName "Content Search Name" -Purge -PurgeType SoftDelete
 
-#Confirm Completion of Content Search
+# Confirm Completion of Content Search
     Get-ComplianceSearch "Content Search Name" | Select Status
 
-#Export of Message Trace
+# Export of Message Trace
     $dateEnd = get-date; Get-MessageTrace -SenderAddress arnie.buchanan@buehler.com -StartDate 08/09/2018 -EndDate $dateEnd -PageSize 5000 | Export-Csv C:\o365\buchanon.csv
 
 
-##-----------------------------------------------------------Shared Mailbox---------------------------------------------------------------------------------------
+## -------------------------------------------------------Shared Mailbox------------------------------------------------------------
 
 
 
-#Send a copy of Sent Item into SMB Sent folder and user sent folder
-##Enable the feature
-##For emails Sent As the shared mailbox:
+# Send a copy of Sent Item into SMB Sent folder and user sent folder
+## Enable the feature
+## For emails Sent As the shared mailbox:
     set-mailbox <mailbox name> -MessageCopyForSentAsEnabled $True
-##For emails Sent On Behalf of the shared mailbox:
+## For emails Sent On Behalf of the shared mailbox:
     set-mailbox <mailbox name> -MessageCopyForSendOnBehalfEnabled $True
-##Disable the feature
-##For messages Sent As the shared mailbox:
+## Disable the feature
+## For messages Sent As the shared mailbox:
     set-mailbox <mailbox name> -MessageCopyForSentAsEnabled $False
-##For emails Sent On Behalf of the shared mailbox:
+## For emails Sent On Behalf of the shared mailbox:
     set-mailbox <mailbox name> -MessageCopyForSendOnBehalfEnabled $False
 
 
 
-##---------------------------------------------CALENDARS---------------------------------------------------------------- 
+## ---------------------------------------------CALENDARS---------------------------------------------------------------- 
 
-##Finding who has what permissions to a Calendar
+## Finding who has what permissions to a Calendar
     Get-MailboxFolderPermission EMAILADDRESS:\calendar | fl
  
-##Add Full Access permissions to a calendar(Change the Command to Set-MailboxFolderPermission if the permission for the user already exist.)
+## Add Full Access permissions to a calendar(Change the Command to Set-MailboxFolderPermission if the permission for the user already exist.)
     Add-MailboxFolderPermission EMAILADDRESS:\calendar –User UPN –AccessRights PERMISSIONS
 
-##Add Bulk Permissions to a Calendar after creating an Array of the UPN's in a Variable
+## Add Bulk Permissions to a Calendar after creating an Array of the UPN's in a Variable
     ForEach ($Var in $UPNVar) {Add-MailboxFolderPermission CALENDAREMAILADDRESS:\calendar -User $Var -AccessRights PERMISSION}
 
 #Owner:	Allows full rights to the mailbox (Calendar or Folder) , including assigning permissions; it is recommended not to assign this role to anyone.
