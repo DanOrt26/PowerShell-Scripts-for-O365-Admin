@@ -1,8 +1,8 @@
 # PowerShell-Scripts-for-O365-Admin
 
-##POWERSHELL O365 COMMANDS
+## POWERSHELL O365 COMMANDS
 
-##------------------------------------------------------------------MAILBOXES-----------------------------------------------------------------------------------
+## ------------------------------------------------------------------MAILBOXES-----------------------------------------------------------------------------------
 
 
 ## Disable Clutter for an individual Mailbox 
@@ -11,10 +11,10 @@
 ## Add SMTP Forwarding Address 
     Set-Mailbox EMAILADDRESS -ForwardingSmtpAddress SMTPADDRESS -DeliverToMailboxAndForward $false
 
-##Remove SMTP Forwarding Address 
+## Remove SMTP Forwarding Address 
     Set-Mailbox EMAILADDRESS -ForwardingSmtpAddress $null
 
-##Remove SMTP Forwarding Address in bulk 
+## Remove SMTP Forwarding Address in bulk 
     Import-Csv "C:\o365\removeforwarding.csv" |foreach {Set-Mailbox $_.upn -ForwardingSmtpAddress $null -DeliverToMailboxAndForward $False}
 
 ##Email Individual Mailbox Archive 
